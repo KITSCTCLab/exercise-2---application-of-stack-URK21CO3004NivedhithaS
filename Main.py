@@ -1,3 +1,4 @@
+import operator
 class Evaluate:
   """This class validates and evaluate postfix expression.
   Attributes:
@@ -8,7 +9,7 @@ class Evaluate:
     # Write your code here
 
 
-  def _init_(self, size):
+  def __init__(self, size):
     """Inits Evaluate with top, size_of_stack and stack.
     Arguments:
       size_of_stack: An integer to set the size of stack.
@@ -24,22 +25,18 @@ class Evaluate:
     Returns:
       True if it is empty, else returns False.
     """
-      # Write your code here
-    if len(self.stack) == 0:
-        return True
-    else:
-        return False
+    return self.top == -1
 
 
-  def pop(self):
+  def mypop(self):
     """
     Do pop operation if the stack is not empty.
     Returns:
       The data which is popped out if the stack is not empty.
     """
-    # Write your code here
-    if len(self.stack) > 0:
+    if not self.isEmpty():
         x = self.stack.pop()
+        self.top = self.top - 1
         return x
 
 
@@ -49,7 +46,7 @@ class Evaluate:
     Arguments:
       operand: The operand to be pushed.
     """
-    # Write your code here
+    self.top += 1
     self.stack.append(operand)
 
 
@@ -61,18 +58,13 @@ class Evaluate:
     Returns:
       True if the expression is valid, else returns False.
     """
-    # Write your code here
-    value = True
-    
-    valid = ['+','-','*','/']
-    
-    for char in expression:
-        if char.isdigit or char in valid:
-            continue
+    counter_digit = counter_operand = 0
+    for token in expression:
+        if token.isdigit():
+            counter_digit += 1
         else:
-            value = False
-    
-    return value
+            counter_operand += 1
+    return counter_digit == counter_operand + 1
 
 
   def evaluate_postfix_expression(self, expression):
@@ -83,35 +75,20 @@ class Evaluate:
     Returns:
       The result of evaluated postfix expression.
     """
-    
-    # Write your code here
-    
-    for char in expression:
-        if char.isdigit():
-            self.push(char)
+    ops = {
+    '+' : operator.add,
+    '-' : operator.sub,
+    '*' : operator.mul,
+    '/' : operator.truediv,
+    '%' : operator.mod,
+    '^' : operator.xor,
+    }
+    for token in expression:
+        if token.isdigit():
+            self.push(int(token))
         else:
-            b = int(self.pop())
-            a = int(self.pop())
-            
-            if char == "+":
-                result = a + b
-            elif char == "-":
-                result = a - b
-            elif char == '*':
-                result = a * b
-            elif char == '/':
-                result = a / b
-            
-            self.push(result)
-    
-    return int(self.stack[0])
-
-
-# Do not change the following code
-postfix_expression = input()  # Read postfix expression
-tokens = postfix_expression.split()
-evaluate = Evaluate(len(tokens))
-if evaluate.validate_postfix_expression(tokens):
-    print(evaluate.evaluate_postfix_expression(tokens))
-else:
-    print('Invalid postfix expression')
+            operand2 = self.mypop()
+            operand1 = self.mypop()
+            result = ops[token](operand1, operand2)
+            self.push(int(result))
+    return self.stack[0]
